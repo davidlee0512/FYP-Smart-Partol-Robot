@@ -107,4 +107,4 @@ venv.bak/
 .vscode/
 
 #nltk
-#nltk_data/
+nltk_data/
