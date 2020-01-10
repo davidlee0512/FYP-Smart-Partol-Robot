@@ -1,0 +1,18 @@
+restaurant
+nearest restaurant
+where is the restaurant
+eat
+hungry
+i am hungry
+food
+finding food
+looking for food
+Now I am in terminal 1, where is the nearest restaurant?
+Eating
+Food place
+McDonald
+Where is McDonald
+Look for the McDonald
+I want to have some food
+Can you find me some food?
+Show me where is the restaurant?
