@@ -1,0 +1,7 @@
+toilet
+room
+go
+service
+park
+checkin
+checkout
