@@ -1,0 +1,12 @@
+buy
+shop
+shopping
+cloth
+souvenir
+postcard
+wine
+cigarette
+bank
+handbag
+toy
+jewels
