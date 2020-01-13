@@ -7,7 +7,8 @@ inputbox.insert(0, "Type in your question here")
 
 
 def on_click(event):
-    event.widget.delete(0, END)
+    if inputbox.get() =="Type in your question here" :
+        event.widget.delete(0, END)
 
 def ask():
     question = inputbox.get()
@@ -16,7 +17,7 @@ def ask():
     inputbox.delete(0,END)
 
 inputbox.bind("<Button-1>", on_click)
-askbutton = Button(root, text="Ask Question", command=ask)
+askbutton = Button(root, text="Ask Question", command=lambda: ask())
 askbutton.pack()
 
 root.mainloop()
