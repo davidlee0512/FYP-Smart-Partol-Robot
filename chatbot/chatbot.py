@@ -6,6 +6,7 @@ from nltk.corpus import treebank
 from nltk.corpus import stopwords
 from numpy import array
 import re
+import MySQLdb
 
 class Classifier:
     
@@ -59,11 +60,11 @@ class KeyWordClassifer(Classifier):
         return max(approximates + exacts)
 
     def getTagFromSentance(self, sentance):
-        return [(max([self.model.similarity(word, tag)) for word in nltk.word_tokenize(sentance.lower())]), tag)for tag in self.tags]
+        return [(max([self.model.similarity(word, tag) for word in nltk.word_tokenize(sentance.lower())]), tag)for tag in self.tags]
 
 
 def getLocation(sentance):
-    locationPatterns = [(r'([a-z]+) floor', "floor"), (r'terminal ([a-z]+)', "terminal")]
+    locationPatterns = [(r'([a-z]+) floor', "floor"), (r'terminal ([a-z]+)', "terminal"), (r'area ([a-z]+)', "area")]
     numberMaping = {"zero":0, "one":1, "two":2, "three":3, "four":4, "five":5, "six":6, "seven":7, "eight":8, "nine":9, 
         "first":1, "second":2, "thrid":3, "fourth":4, "fifth":5, "sixth":6, "seventh":7, "eighth":8, "ninth":9}
     results = []

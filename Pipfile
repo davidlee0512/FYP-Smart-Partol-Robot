@@ -10,6 +10,9 @@ nltk = "*"
 numpy = "*"
 scikit-learn = "*"
 gensim = "*"
+mysqlclient = "*"
+mysql-connector = "*"
+ttkthemes = "*"
 
 [requires]
 python_version = "3.6"
