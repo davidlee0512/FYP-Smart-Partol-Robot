@@ -16,156 +16,56 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `facility`
+-- Table structure for table `match`
 --
 
-DROP TABLE IF EXISTS `facility`;
+DROP TABLE IF EXISTS `match`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `facility` (
-  `id` int(11) NOT NULL,
-  `name` varchar(100) DEFAULT NULL,
-  `location` varchar(1000) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `facility`
---
-
-LOCK TABLES `facility` WRITE;
-/*!40000 ALTER TABLE `facility` DISABLE KEYS */;
-INSERT INTO `facility` VALUES (1,'toilet','terminal1,1/F,xxx'),(2,'toilet','terminal1,1/F,yyy'),(3,'prayer room','terminal1,2/F,xxx');
-/*!40000 ALTER TABLE `facility` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `facility_tag`
---
-
-DROP TABLE IF EXISTS `facility_tag`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `facility_tag` (
-  `fid` int(11) NOT NULL,
+CREATE TABLE `match` (
+  `pid` int(11) NOT NULL,
   `tid` int(11) NOT NULL,
-  PRIMARY KEY (`fid`,`tid`),
-  KEY `tid_idx` (`tid`),
-  CONSTRAINT `facility` FOREIGN KEY (`fid`) REFERENCES `facility` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `ftag` FOREIGN KEY (`tid`) REFERENCES `tag` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `facility_tag`
---
-
-LOCK TABLES `facility_tag` WRITE;
-/*!40000 ALTER TABLE `facility_tag` DISABLE KEYS */;
-/*!40000 ALTER TABLE `facility_tag` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `restaurant`
---
-
-DROP TABLE IF EXISTS `restaurant`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `restaurant` (
-  `id` int(11) NOT NULL,
-  `name` varchar(100) DEFAULT NULL,
-  `location` varchar(1000) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `restaurant`
---
-
-LOCK TABLES `restaurant` WRITE;
-/*!40000 ALTER TABLE `restaurant` DISABLE KEYS */;
-INSERT INTO `restaurant` VALUES (1,'McDonald\'s','terminal1,1/F,xxx'),(2,'KFC','terminal1,2/F,xxx'),(3,'Chinese Food','terminal1,...'),(4,'Thai Food','terminal1,...'),(5,'Super Sandwich','terminal1...');
-/*!40000 ALTER TABLE `restaurant` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `restaurant_tag`
---
-
-DROP TABLE IF EXISTS `restaurant_tag`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `restaurant_tag` (
-  `rid` int(11) NOT NULL,
-  `tid` int(11) NOT NULL,
-  PRIMARY KEY (`rid`,`tid`),
+  PRIMARY KEY (`pid`,`tid`),
   KEY `tag_idx` (`tid`),
-  CONSTRAINT `restaurant` FOREIGN KEY (`rid`) REFERENCES `restaurant` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `rtag` FOREIGN KEY (`tid`) REFERENCES `tag` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  CONSTRAINT `place` FOREIGN KEY (`pid`) REFERENCES `place` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `tag` FOREIGN KEY (`tid`) REFERENCES `tag` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `restaurant_tag`
+-- Dumping data for table `match`
 --
 
-LOCK TABLES `restaurant_tag` WRITE;
-/*!40000 ALTER TABLE `restaurant_tag` DISABLE KEYS */;
-INSERT INTO `restaurant_tag` VALUES (1,1),(2,1),(3,2);
-/*!40000 ALTER TABLE `restaurant_tag` ENABLE KEYS */;
+LOCK TABLES `match` WRITE;
+/*!40000 ALTER TABLE `match` DISABLE KEYS */;
+INSERT INTO `match` VALUES (1,1),(2,1),(4,2),(3,6),(1,8),(3,12),(9,14),(10,15),(6,16),(6,17),(8,18),(5,20);
+/*!40000 ALTER TABLE `match` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `shop`
+-- Table structure for table `place`
 --
 
-DROP TABLE IF EXISTS `shop`;
+DROP TABLE IF EXISTS `place`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `shop` (
+CREATE TABLE `place` (
   `id` int(11) NOT NULL,
   `name` varchar(100) DEFAULT NULL,
   `location` varchar(1000) DEFAULT NULL,
+  `category` varchar(10) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `shop`
+-- Dumping data for table `place`
 --
 
-LOCK TABLES `shop` WRITE;
-/*!40000 ALTER TABLE `shop` DISABLE KEYS */;
-/*!40000 ALTER TABLE `shop` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `shop_tag`
---
-
-DROP TABLE IF EXISTS `shop_tag`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `shop_tag` (
-  `sid` int(11) NOT NULL,
-  `tid` int(11) NOT NULL,
-  PRIMARY KEY (`sid`,`tid`),
-  KEY `stag_idx` (`tid`),
-  CONSTRAINT `shop` FOREIGN KEY (`sid`) REFERENCES `shop` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `stag` FOREIGN KEY (`tid`) REFERENCES `tag` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `shop_tag`
---
-
-LOCK TABLES `shop_tag` WRITE;
-/*!40000 ALTER TABLE `shop_tag` DISABLE KEYS */;
-/*!40000 ALTER TABLE `shop_tag` ENABLE KEYS */;
+LOCK TABLES `place` WRITE;
+/*!40000 ALTER TABLE `place` DISABLE KEYS */;
+INSERT INTO `place` VALUES (1,'McDonald\'s','shop 100, 1/F, area A, terminal 1','restaurant'),(2,'KFC','shop 201, 2/F, area B, terminal 1','restaurant'),(3,'Ajisen Ramen','shop 101, 1/F, area A, terminal 1','restaurant'),(4,'Crystal Jade','shop 202, 2/F, area B, terminal 1','restaurant'),(5,'Beauty&You','shop 120, 1/F, area D, terminal 1','shop'),(6,'Burberry','shop 141, 1/F, area E, terminal 1','shop'),(7,'Cartier','shop 220, 2/F, area C, terminal 1','shop'),(8,'Chung Hwa Book Co.','shop 169, 1/F, area F, terminal 1','shop'),(9,'toilet','t1, 1/F, area A, terminal 1','facility'),(10,'prayer room','pr1, 2/F, area C, terminal 1','facility');
+/*!40000 ALTER TABLE `place` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -188,7 +88,7 @@ CREATE TABLE `tag` (
 
 LOCK TABLES `tag` WRITE;
 /*!40000 ALTER TABLE `tag` DISABLE KEYS */;
-INSERT INTO `tag` VALUES (1,'fast food'),(2,'chinese food'),(3,'thai food'),(4,'toilet'),(5,'italian food'),(6,'cloth'),(7,'jewelery');
+INSERT INTO `tag` VALUES (1,'fast food'),(2,'chinese food'),(3,'thai food'),(4,'italian food'),(5,'french food'),(6,'japanese food'),(7,'hong kong food'),(8,'hamburger'),(9,'spaghetti'),(10,'pizza'),(11,'sushi'),(12,'ramen'),(13,'sashimi'),(14,'toilet'),(15,'prayer room'),(16,'cloth'),(17,'fashion'),(18,'book'),(19,'souvenir'),(20,'cosmetic');
 /*!40000 ALTER TABLE `tag` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -201,4 +101,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-01-13 16:26:36
+-- Dump completed on 2020-01-16 15:58:19
