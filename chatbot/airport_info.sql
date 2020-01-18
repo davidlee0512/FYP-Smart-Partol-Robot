@@ -62,7 +62,7 @@ CREATE TABLE `match` (
 
 LOCK TABLES `match` WRITE;
 /*!40000 ALTER TABLE `match` DISABLE KEYS */;
-INSERT INTO `match` VALUES (1,1),(2,1),(4,2),(3,6),(1,8),(3,12),(9,14),(10,15),(6,16),(6,17),(8,18),(5,20);
+INSERT INTO `match` VALUES (1,1),(2,1),(4,2),(3,6),(1,8),(3,12),(9,14),(10,15),(6,16),(6,17),(8,18),(5,20),(7,21),(7,22);
 /*!40000 ALTER TABLE `match` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -114,7 +114,7 @@ CREATE TABLE `tag` (
 
 LOCK TABLES `tag` WRITE;
 /*!40000 ALTER TABLE `tag` DISABLE KEYS */;
-INSERT INTO `tag` VALUES (1,'fast food',1),(2,'chinese food',1),(3,'thai food',1),(4,'italian food',1),(5,'french food',1),(6,'japanese food',1),(7,'hong kong food',1),(8,'hamburger',1),(9,'spaghetti',1),(10,'pizza',1),(11,'sushi',1),(12,'ramen',1),(13,'sashimi',1),(14,'toilet',3),(15,'prayer room',3),(16,'cloth',2),(17,'fashion',2),(18,'book',2),(19,'souvenir',2),(20,'cosmetic',2);
+INSERT INTO `tag` VALUES (1,'fast food',1),(2,'chinese food',1),(3,'thai food',1),(4,'italian food',1),(5,'french food',1),(6,'japanese food',1),(7,'hong kong food',1),(8,'hamburger',1),(9,'spaghetti',1),(10,'pizza',1),(11,'sushi',1),(12,'ramen',1),(13,'sashimi',1),(14,'toilet',3),(15,'prayer room',3),(16,'cloth',2),(17,'fashion',2),(18,'book',2),(19,'souvenir',2),(20,'cosmetic',2),(21,'jewelery',2),(22,'watch',2);
 /*!40000 ALTER TABLE `tag` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -127,4 +127,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-01-17 14:25:17
+-- Dump completed on 2020-01-18 16:46:55
