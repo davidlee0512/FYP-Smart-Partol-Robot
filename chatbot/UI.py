@@ -4,6 +4,9 @@ from ttkthemes import themed_tk
 from ttkthemes import ThemedTk
 import tkinter as tk
 import time
+from chatbot import Chatbot
+
+chatbot = Chatbot(categorys = ["restaurant", "shop", "facility"], dbargs = ("localhost", "root", "Davidlee12059801", "airport_info"))
 linenum = 0
 root = ThemedTk(theme="radiance") 
 root.title('Q&A Chatbot')
@@ -44,9 +47,10 @@ def ask(event=None):
         mylable= ttk.Label(scrollable_frame, text=question,anchor='w',width = 45,wraplengt=350, background='#BC986A', foreground='White',font=('Helvetica', 11))
         mylable.grid(row=linenum, column=0,padx=0)
         linenum = linenum + 1
-        mylable2= ttk.Label(scrollable_frame, text="ANSWER",anchor='e',width = 45,background='#FBEEC1',font=('Helvetica', 11))
+        answer = chatbot.askQuestion(question)
+        mylable2= ttk.Label(scrollable_frame, text=answer,anchor='e',width = 45,background='#FBEEC1',font=('Helvetica', 11))
         mylable2.grid(row=linenum, column=0,padx=0)
-        answerlength = 1
+        answerlength = answer.count("\n") + 1
         linenum = linenum + answerlength
         inputbox.delete(0,END)
         canvas.yview_moveto(1)
