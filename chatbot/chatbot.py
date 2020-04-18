@@ -68,37 +68,17 @@ class KeyWordClassifer(Classifier):
 
 
 def getLocation(sentence):
-    locationPatterns = [(r'([a-z]+) floor', "floor"), (r'terminal ([a-z]+)', "terminal"), (r'area ([a-z]+)', "area")]
+    locationPatterns = [(r'([a-z]+) floor', "{}/F"), (r'terminal ([a-z]+)', "terminal {0}")]
     numberMaping = {"zero":0, "one":1, "two":2, "three":3, "four":4, "five":5, "six":6, "seven":7, "eight":8, "nine":9, 
         "first":1, "second":2, "thrid":3, "fourth":4, "fifth":5, "sixth":6, "seventh":7, "eighth":8, "ninth":9}
     results = []
-    for locationPattern,locationType in locationPatterns:
+    for locationPattern, locationFormat in locationPatterns:
         result = re.search(locationPattern, sentence, re.IGNORECASE)
         if result and result.group(1) in numberMaping:
-            results.append((numberMaping[result.group(1)], locationType))
+            results.append(locationFormat.format(numberMaping[result.group(1)]))
 
     return results
 
-
-def main():
-    categorys = [("restaurant"), ("shop"), ("facility")]
-    
-    print("loading word2vec")
-    word2vec = gensim.models.KeyedVectors.load_word2vec_format("./nltk_data/models/GoogleNews-vectors-negative300/GoogleNews-vectors-negative300.bin", binary=True)
-    
-
-    classifiers = {category: KeyWordClassifer(category, model=word2vec) for category in categorys}
-
-    
-    while True:
-        sentence = input("input a string >")
-        if (sentence == ""):
-            break
-        similarities = [(classifier.similar(sentence), category) for category, classifier in classifiers.items()] 
-        print(similaritys)
-        _, maxCategory = max(similarities)
-        print("category: " + maxCategory)
-        print("tag: " + classifiers[maxCategory].getTagFromSentance(sentence))
 
 class Chatbot():
 
