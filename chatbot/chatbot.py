@@ -8,6 +8,7 @@ from numpy import array
 import re
 import MySQLdb
 import random
+from googletrans import Translator
 
 nltk.data.path += ["./nltk_data"]
 
@@ -151,6 +152,12 @@ class Chatbot():
 
         return the answer
         """
+
+        translator = Translator()
+        response =  translator.translate(question)
+        questionLang = response.src
+        question = response.text
+
         #get the probility of the question to each class
         similarities = [(classifier.similar(question), category) for category, classifier in self.classifiers.items()] 
         print(similarities)
@@ -171,12 +178,32 @@ class Chatbot():
 
         dbResult = self.fetchInfoFromDB(category=maxCategory, locations=locationTags, tags=tags)
 
+        #TODO add output for chinese input
+        if (questionLang == "zh-CN"):
+            output = "搜尋結果:\n"
+            output += "搜尋項目: " + maxCategory + "\n"
+
+            if tags:
+                output += "關鍵字: " + str(tags) + "\n"
+
+            if locationTags:
+                output += "地點: " + str(locationTags) + "\n"
+
+            if dbResult:
+                output += str(dbResult) 
+            else:
+                output += "找不到相關項目"
+                return output
+
         output = "Here is the result:\n"
         output += "Category: " + maxCategory + "\n"
+
         if tags:
             output += "Tags: " + str(tags) + "\n"
+
         if locationTags:
             output += "Location: " + str(locationTags) + "\n"
+
         if dbResult:
             output += str(dbResult) 
         else:
