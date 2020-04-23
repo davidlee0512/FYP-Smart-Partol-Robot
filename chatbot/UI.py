@@ -10,7 +10,7 @@ chatbot = Chatbot(categorys = ["restaurant", "shop", "facility"], dbargs = ("loc
 linenum = 0
 root = ThemedTk(theme="radiance") 
 root.title('Q&A Chatbot')
-root.geometry("400x300")
+root.geometry("400x350")
 root.resizable(0, 0) 
 
 container = ttk.Frame(root)
@@ -60,12 +60,16 @@ def ask(event=None):
         canvas.yview_moveto(1)
 def toend():
     canvas.yview_moveto(1)
+def reset():
+    None
 
 
 
 inputbox.bind('<Return>', ask)
 inputbox.bind("<Button-1>", on_click)
 askbutton = ttk.Button(frame2, text="Ask Question", command=lambda: [ask(),toend()],width=13)
+resetbutton = ttk.Button(frame2, text="Reset", command=lambda: [reset()],width=8)
 askbutton.grid(row=0, column=1, padx=30)
+resetbutton.grid(row=1, column=1, padx=30)
 
 root.mainloop()
