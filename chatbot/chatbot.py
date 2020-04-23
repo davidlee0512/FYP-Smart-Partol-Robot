@@ -98,7 +98,7 @@ class Chatbot():
 
     def __init__(self, categorys = ["restaurant", "shop", "facility"], dbargs = ("localhost", "root", "", "airport_info")):
         self.categorys = categorys
-        self.db = MySQLdb.connect(*dbargs)
+        self.db = MySQLdb.connect(*dbargs) or None
 
         print("loading word2vec")
         word2vecPath = "./nltk_data/models/GoogleNews-vectors-negative300/GoogleNews-vectors-negative300.bin"
