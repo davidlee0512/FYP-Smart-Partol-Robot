@@ -13,6 +13,7 @@ gensim = "*"
 mysqlclient = "*"
 mysql-connector = "*"
 ttkthemes = "*"
+googletrans = "*"
 
 [requires]
 python_version = "3.6"

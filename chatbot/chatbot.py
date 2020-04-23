@@ -8,6 +8,7 @@ from numpy import array
 import re
 import MySQLdb
 import random
+from googletrans import Translator
 
 nltk.data.path += ["./nltk_data"]
 
@@ -32,9 +33,10 @@ class Classifier:
 #     setb = set(b)
 #     return len(seta.intersection(setb))/len(seta.union(setb))
 
-def cossim( vec1, vec2):
+def cossim(vec1, vec2):
     return numpy.dot(gensim.matutils.unitvec(vec1), gensim.matutils.unitvec(vec2))
 
+#one Classifer per Category
 class KeyWordClassifer(Classifier):
 
     def __init__(self, category, *args, model=None, tags=[], **kwargs):
@@ -52,25 +54,37 @@ class KeyWordClassifer(Classifier):
         except Exception as e:
             print(e)
 
+    #return the probility of the sentence that belong this class
     def similar(self, sentence):
         if (self.model == None):
             return 0
         
+        #geting stop word from NLTK
         stop_words = stopwords.words('english')
+
+        #spilting words from sentence 
         words = nltk.pos_tag(nltk.word_tokenize(sentence.lower()))
         words = [(word, pos) for word, pos in words if (word not in stop_words and word not in string.punctuation)]
+
+        #approximates the sentence by the overall wordVector
         approximates = [ cossim(self.wordVector, self.model[word]) for word, pos in words if word in self.model] or [0]
+
+        #check if there is exact key word in the sentence
         exacts = [0.5 if pos[0:2]=="VB" else 1 for word, pos in words if word in self.keywords] or [0]
+
         return max(approximates + exacts)
 
-    def getTagFromSentance(self, sentence):
-        return [(max([self.model.similarity(word, tag) for word in nltk.word_tokenize(sentence.lower()) if word in self.model]), tag)for tag in self.tags]
+    def getTagFromSentence(self, sentence):
+        words = nltk.word_tokenize(sentence.lower())
+        return [(max([self.model.similarity(word, tag) for word in words if word in self.model]), tag)for tag in self.tags]
 
 
 def getLocation(sentence):
+    #pattens for getting location
     locationPatterns = [(r'([a-z]+) floor', "{}/F"), (r'terminal ([a-z]+)', "terminal {0}")]
     numberMaping = {"zero":0, "one":1, "two":2, "three":3, "four":4, "five":5, "six":6, "seven":7, "eight":8, "nine":9, 
         "first":1, "second":2, "thrid":3, "fourth":4, "fifth":5, "sixth":6, "seventh":7, "eighth":8, "ninth":9}
+    
     results = []
     for locationPattern, locationFormat in locationPatterns:
         result = re.search(locationPattern, sentence, re.IGNORECASE)
@@ -82,7 +96,7 @@ def getLocation(sentence):
 
 class Chatbot():
 
-    def __init__(self, categorys = ["restaurant", "shop", "facility"], dbargs = ("localhost", "root", "Davidlee12059801", "airport_info")):
+    def __init__(self, categorys = ["restaurant", "shop", "facility"], dbargs = ("localhost", "root", "", "airport_info")):
         self.categorys = categorys
         self.db = MySQLdb.connect(*dbargs)
 
@@ -138,28 +152,58 @@ class Chatbot():
 
         return the answer
         """
+
+        translator = Translator()
+        response =  translator.translate(question)
+        questionLang = response.src
+        question = response.text
+
+        #get the probility of the question to each class
         similarities = [(classifier.similar(question), category) for category, classifier in self.classifiers.items()] 
         print(similarities)
+
         maxSimilarity, maxCategory = max(similarities)
         if (maxSimilarity < 0.5):
             return "I don't know your question, please ask again"
 
-        tagSimilarity = self.classifiers[maxCategory].getTagFromSentance(question)
+        #get the probility of each tag and get the location information in the question
+        tagSimilarity = self.classifiers[maxCategory].getTagFromSentence(question)
         locationTags = getLocation(question)
         print("category: ", maxCategory)
         print("tag: ", tagSimilarity)
         print("locationTags: ", locationTags)
 
+        #filter the tag with high similarity and use it to search the database
         tags = [tag for sim, tag in tagSimilarity if sim > 0.7]
 
         dbResult = self.fetchInfoFromDB(category=maxCategory, locations=locationTags, tags=tags)
 
+        #TODO add output for chinese input
+        if (questionLang == "zh-CN"):
+            output = "搜尋結果:\n"
+            output += "搜尋項目: " + maxCategory + "\n"
+
+            if tags:
+                output += "關鍵字: " + str(tags) + "\n"
+
+            if locationTags:
+                output += "地點: " + str(locationTags) + "\n"
+
+            if dbResult:
+                output += str(dbResult) 
+            else:
+                output += "找不到相關項目"
+                return output
+
         output = "Here is the result:\n"
         output += "Category: " + maxCategory + "\n"
+
         if tags:
             output += "Tags: " + str(tags) + "\n"
+
         if locationTags:
             output += "Location: " + str(locationTags) + "\n"
+
         if dbResult:
             output += str(dbResult) 
         else:
