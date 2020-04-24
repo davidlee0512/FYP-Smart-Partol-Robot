@@ -40,13 +40,39 @@ INSERT INTO `category` VALUES (1,'restaurant'),(2,'shop'),(3,'facility');
 UNLOCK TABLES;
 
 --
--- Table structure for table `match`
+-- Table structure for table `contradiction`
 --
 
-DROP TABLE IF EXISTS `match`;
+DROP TABLE IF EXISTS `contradiction`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `match` (
+CREATE TABLE `contradiction` (
+  `tid1` int(11) NOT NULL,
+  `tid2` int(11) NOT NULL,
+  PRIMARY KEY (`tid1`,`tid2`),
+  KEY `tid2_idx` (`tid2`),
+  CONSTRAINT `tid1` FOREIGN KEY (`tid1`) REFERENCES `tag` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `tid2` FOREIGN KEY (`tid2`) REFERENCES `tag` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `contradiction`
+--
+
+LOCK TABLES `contradiction` WRITE;
+/*!40000 ALTER TABLE `contradiction` DISABLE KEYS */;
+/*!40000 ALTER TABLE `contradiction` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `matching`
+--
+
+DROP TABLE IF EXISTS `matching`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `matching` (
   `pid` int(11) NOT NULL,
   `tid` int(11) NOT NULL,
   PRIMARY KEY (`pid`,`tid`),
@@ -57,13 +83,13 @@ CREATE TABLE `match` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `match`
+-- Dumping data for table `matching`
 --
 
-LOCK TABLES `match` WRITE;
-/*!40000 ALTER TABLE `match` DISABLE KEYS */;
-INSERT INTO `match` VALUES (1,1),(2,1),(4,2),(3,6),(1,8),(3,12),(9,14),(10,15),(6,16),(6,17),(8,18),(5,20),(7,21),(7,22);
-/*!40000 ALTER TABLE `match` ENABLE KEYS */;
+LOCK TABLES `matching` WRITE;
+/*!40000 ALTER TABLE `matching` DISABLE KEYS */;
+INSERT INTO `matching` VALUES (1,1),(2,1),(4,2),(3,6),(11,6),(1,8),(11,11),(3,12),(9,14),(10,15),(6,16),(6,17),(8,18),(5,20),(7,21),(7,22);
+/*!40000 ALTER TABLE `matching` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -87,7 +113,7 @@ CREATE TABLE `place` (
 
 LOCK TABLES `place` WRITE;
 /*!40000 ALTER TABLE `place` DISABLE KEYS */;
-INSERT INTO `place` VALUES (1,'McDonald\'s','shop 100, 1/F, area A, terminal 1'),(2,'KFC','shop 201, 2/F, area B, terminal 1'),(3,'Ajisen Ramen','shop 101, 1/F, area A, terminal 1'),(4,'Crystal Jade','shop 202, 2/F, area B, terminal 1'),(5,'Beauty&You','shop 120, 1/F, area D, terminal 1'),(6,'Burberry','shop 141, 1/F, area E, terminal 1'),(7,'Cartier','shop 220, 2/F, area C, terminal 1'),(8,'Chung Hwa Book Co.','shop 169, 1/F, area F, terminal 1'),(9,'toilet','t1, 1/F, area A, terminal 1'),(10,'prayer room','pr1, 2/F, area C, terminal 1');
+INSERT INTO `place` VALUES (1,'McDonald\'s','shop 100, 1/F, area A, terminal 1'),(2,'KFC','shop 201, 2/F, area B, terminal 1'),(3,'Ajisen Ramen','shop 101, 1/F, area A, terminal 1'),(4,'Crystal Jade','shop 202, 2/F, area B, terminal 1'),(5,'Beauty&You','shop 120, 1/F, area D, terminal 1'),(6,'Burberry','shop 141, 1/F, area E, terminal 1'),(7,'Cartier','shop 220, 2/F, area C, terminal 1'),(8,'Chung Hwa Book Co.','shop 169, 1/F, area F, terminal 1'),(9,'toilet','t1, 1/F, area A, terminal 1'),(10,'prayer room','pr1, 2/F, area C, terminal 1'),(11,'Fresh Sushi','somewhere, terminal 1');
 /*!40000 ALTER TABLE `place` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -127,4 +153,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-01-18 16:46:55
+-- Dump completed on 2020-04-24 17:48:59
