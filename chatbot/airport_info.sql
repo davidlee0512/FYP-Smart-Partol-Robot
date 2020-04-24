@@ -35,34 +35,8 @@ CREATE TABLE `category` (
 
 LOCK TABLES `category` WRITE;
 /*!40000 ALTER TABLE `category` DISABLE KEYS */;
-INSERT INTO `category` VALUES (1,'restaurant'),(2,'shop'),(3,'facility');
+INSERT INTO `category` VALUES (1,'restaurant'),(2,'shop'),(3,'facility'),(4,'location');
 /*!40000 ALTER TABLE `category` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `contradiction`
---
-
-DROP TABLE IF EXISTS `contradiction`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `contradiction` (
-  `tid1` int(11) NOT NULL,
-  `tid2` int(11) NOT NULL,
-  PRIMARY KEY (`tid1`,`tid2`),
-  KEY `tid2_idx` (`tid2`),
-  CONSTRAINT `tid1` FOREIGN KEY (`tid1`) REFERENCES `tag` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `tid2` FOREIGN KEY (`tid2`) REFERENCES `tag` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `contradiction`
---
-
-LOCK TABLES `contradiction` WRITE;
-/*!40000 ALTER TABLE `contradiction` DISABLE KEYS */;
-/*!40000 ALTER TABLE `contradiction` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -128,6 +102,7 @@ CREATE TABLE `tag` (
   `id` int(10) NOT NULL,
   `name` varchar(100) DEFAULT NULL,
   `cid` int(11) DEFAULT NULL,
+  `contra_type` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `category_idx` (`cid`),
   CONSTRAINT `category` FOREIGN KEY (`cid`) REFERENCES `category` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
@@ -140,7 +115,7 @@ CREATE TABLE `tag` (
 
 LOCK TABLES `tag` WRITE;
 /*!40000 ALTER TABLE `tag` DISABLE KEYS */;
-INSERT INTO `tag` VALUES (1,'fast food',1),(2,'chinese food',1),(3,'thai food',1),(4,'italian food',1),(5,'french food',1),(6,'japanese food',1),(7,'hong kong food',1),(8,'hamburger',1),(9,'spaghetti',1),(10,'pizza',1),(11,'sushi',1),(12,'ramen',1),(13,'sashimi',1),(14,'toilet',3),(15,'prayer room',3),(16,'cloth',2),(17,'fashion',2),(18,'book',2),(19,'souvenir',2),(20,'cosmetic',2),(21,'jewelery',2),(22,'watch',2);
+INSERT INTO `tag` VALUES (1,'fast food',1,NULL),(2,'chinese food',1,NULL),(3,'thai food',1,NULL),(4,'italian food',1,NULL),(5,'french food',1,NULL),(6,'japanese food',1,NULL),(7,'hong kong food',1,NULL),(8,'hamburger',1,NULL),(9,'spaghetti',1,NULL),(10,'pizza',1,NULL),(11,'sushi',1,NULL),(12,'ramen',1,NULL),(13,'sashimi',1,NULL),(14,'toilet',3,'A'),(15,'prayer room',3,'A'),(16,'cloth',2,NULL),(17,'fashion',2,NULL),(18,'book',2,NULL),(19,'souvenir',2,NULL),(20,'cosmetic',2,NULL),(21,'jewelery',2,NULL),(22,'watch',2,NULL),(23,'terminal1',4,'B'),(24,'terminal2',4,'B'),(25,'G/F',4,'C'),(26,'1/F',4,'C'),(27,'2/F',4,'C');
 /*!40000 ALTER TABLE `tag` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -153,4 +128,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-04-24 17:48:59
+-- Dump completed on 2020-04-24 22:42:23
