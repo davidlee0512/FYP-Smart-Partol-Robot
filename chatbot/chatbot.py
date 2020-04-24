@@ -45,7 +45,7 @@ class KeyWordClassifer(Classifier):
         self.tags = [tag for tag in tags if tag in self.model]
         print("loaded tag: ", self.tags)
         print("loading ", category)
-        path = "./keyword/" + category + ".txt"
+        path = "./chatbot/keyword/" + category + ".txt"
         try:
             with open(path, "r") as f:
                 keywords = f.read().split('\n')
