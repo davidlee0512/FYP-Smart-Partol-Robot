@@ -1,20 +1,20 @@
 import nltk
 import gensim
 import string
-import numpy
+import numpy as np
 from nltk.corpus import treebank
 from nltk.corpus import stopwords
-from numpy import array
 import re
 import MySQLdb
 import random
 from googletrans import Translator
+from nltk.parse.corenlp import CoreNLPDependencyParser
 
 nltk.data.path += ["./nltk_data"]
 
 class Classifier:
     
-    def __init__(*args, **kwargs):
+    def __init__(self, *args, **kwargs):
         pass
 
     def similar(self, sentence):
@@ -34,7 +34,7 @@ class Classifier:
 #     return len(seta.intersection(setb))/len(seta.union(setb))
 
 def cossim(vec1, vec2):
-    return numpy.dot(gensim.matutils.unitvec(vec1), gensim.matutils.unitvec(vec2))
+    return np.dot(gensim.matutils.unitvec(vec1), gensim.matutils.unitvec(vec2))
 
 #one Classifer per Category
 class KeyWordClassifer(Classifier):
@@ -45,12 +45,12 @@ class KeyWordClassifer(Classifier):
         self.tags = [tag for tag in tags if tag in self.model]
         print("loaded tag: ", self.tags)
         print("loading ", category)
-        path = "./chatbot/keyword/" + category + ".txt"
+        path = "./keyword/" + category + ".txt"
         try:
             with open(path, "r") as f:
                 keywords = f.read().split('\n')
                 self.keywords = keywords
-                self.wordVector = array([model[keyword] for keyword in keywords]).mean(axis=0)
+                self.wordVector = np.array([model[keyword] for keyword in keywords]).mean(axis=0)
         except Exception as e:
             print(e)
 
@@ -76,7 +76,58 @@ class KeyWordClassifer(Classifier):
 
     def getTagFromSentence(self, sentence):
         words = nltk.word_tokenize(sentence.lower())
-        return [(max([self.model.similarity(word, tag) for word in words if word in self.model]), tag)for tag in self.tags]
+        notWords = ["not", "n't", "hate", "except", "without", "no"]
+
+        #required the parser server to be open
+        dep_parser = CoreNLPDependencyParser(url='http://localhost:9000')
+        #parse is a DependencyGraph object(nltk.parse.DependencyGraph)
+        parse, = dep_parser.raw_parse(sentence)
+
+        #words is a list of (word, positive search or negative search)
+        words = [(node["word"], False) for node in parse.nodes.values()]
+
+        #switching some part of the word into negative search if it is in notWords
+        for node in parse.nodes.values():
+            if node["word"] in notWords:
+                def allDeps(_node):
+                    i = _node["address"]
+                    words[i] = (words[i][0], True)
+                    for rel in _node["deps"]:
+                        for j in _node["deps"][rel]:
+                            allDeps(parse.nodes[j])
+
+                def getObj(_node):
+                    try:
+                        base = parse.nodes[_node["deps"]["obj"][0]]
+                    except:
+                        base = None
+                        
+                    return base
+                
+                #case a proposition
+                if node["word"] in ["no", "without", "except"]:
+                    base = parse.nodes[node["head"]]
+                    allDeps(base)
+
+                #case of not
+                elif node["word"] in ["not", "n't"]:
+                    head = parse.nodes[node["head"]]
+                    if re.search(r"VB[a-zA-Z]*", head["tag"]):
+                        base = getObj(head)
+                    else:
+                        base = head
+
+                    if base:
+                        allDeps(base)
+
+                #case of verb
+                elif node["word"] in ["hate"]:
+                    base = getObj(node)
+
+                    if base:
+                        allDeps(base)
+
+        return [(max([(self.model.similarity(word, tag), negSearch) for word, negSearch in words if word in self.model]), tag)for tag in self.tags]
 
 
 def getLocation(sentence):
@@ -116,6 +167,8 @@ class Chatbot():
     def fetchInfoFromDB(self, category="", locations=[], tags=[]):
         if self.db and category:
             with self.db.cursor() as cursor:
+                tags = [tag for tag, isNeg in tags]
+
                 if tags:
                     sql = """
                         SELECT place.id, place.name, place.location 
@@ -174,7 +227,7 @@ class Chatbot():
         print("locationTags: ", locationTags)
 
         #filter the tag with high similarity and use it to search the database
-        tags = [tag for sim, tag in tagSimilarity if sim > 0.7]
+        tags = [(tag,isNeg) for (sim, isNeg), tag in tagSimilarity if sim > 0.7]
 
         dbResult = self.fetchInfoFromDB(category=maxCategory, locations=locationTags, tags=tags)
 

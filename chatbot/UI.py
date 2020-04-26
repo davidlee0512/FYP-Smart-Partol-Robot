@@ -6,7 +6,7 @@ import tkinter as tk
 import time
 from chatbot import Chatbot
 
-chatbot = Chatbot(categorys = ["restaurant", "shop", "facility"], dbargs = ("localhost", "root", "Davidlee12059801", "airport_info"))
+chatbot = Chatbot(categorys = ["restaurant", "shop", "facility"], dbargs = ("localhost", "root", "", "airport_info"))
 linenum = 0
 root = ThemedTk(theme="radiance") 
 root.title('Q&A Chatbot')
