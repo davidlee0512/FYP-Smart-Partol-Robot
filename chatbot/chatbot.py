@@ -150,7 +150,8 @@ class Chatbot():
     def __init__(self, categorys = ["restaurant", "shop", "facility"], dbargs = ("localhost", "root", "", "airport_info")):
         self.categorys = categorys
         self.db = MySQLdb.connect(*dbargs) or None
-
+        self.userpreference = []
+        self.currentlocation = ["1/F"]
         print("loading word2vec")
         word2vecPath = "./nltk_data/models/GoogleNews-vectors-negative300/GoogleNews-vectors-negative300.bin"
         self.word2vec = gensim.models.KeyedVectors.load_word2vec_format(word2vecPath , binary=True)
@@ -196,6 +197,7 @@ class Chatbot():
                 else:
                     return None
                 
+    def renewlocation(self,locations):
 
     def askQuestion(self, question):
         """Ask a question to the chat bot
@@ -221,14 +223,24 @@ class Chatbot():
 
         #get the probility of each tag and get the location information in the question
         tagSimilarity = self.classifiers[maxCategory].getTagFromSentence(question)
-        locationTags = getLocation(question)
+        if not getLocation(question):
+            locationTags= self.currentlocation
+        else:
+            locationTags = getLocation(question)
+            renewlocation(locations=locationTags)
+            
         print("category: ", maxCategory)
         print("tag: ", tagSimilarity)
         print("locationTags: ", locationTags)
 
         #filter the tag with high similarity and use it to search the database
         tags = [(tag,isNeg) for (sim, isNeg), tag in tagSimilarity if sim > 0.7]
-
+        #userpreference.extend(tags)
+        #s = []
+        #for i in userpreference:
+        #    if i not in s:
+        #     s.append(i)
+        #userpreference=s
         dbResult = self.fetchInfoFromDB(category=maxCategory, locations=locationTags, tags=tags)
 
         #TODO add output for chinese input
