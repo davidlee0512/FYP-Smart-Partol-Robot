@@ -134,7 +134,7 @@ def getLocation(sentence):
     #pattens for getting location
     locationPatterns = [(r'([a-z]+) floor', "{}/F"), (r'terminal ([a-z]+)', "terminal {0}")]
     numberMaping = {"zero":0, "one":1, "two":2, "three":3, "four":4, "five":5, "six":6, "seven":7, "eight":8, "nine":9, 
-        "first":1, "second":2, "thrid":3, "fourth":4, "fifth":5, "sixth":6, "seventh":7, "eighth":8, "ninth":9}
+        "first":1, "second":2, "third":3, "fourth":4, "fifth":5, "sixth":6, "seventh":7, "eighth":8, "ninth":9}
     
     results = []
     for locationPattern, locationFormat in locationPatterns:
@@ -150,8 +150,7 @@ class Chatbot():
     def __init__(self, categorys = ["restaurant", "shop", "facility"], dbargs = ("localhost", "root", "", "airport_info")):
         self.categorys = categorys
         self.db = MySQLdb.connect(*dbargs) or None
-        self.userpreference = []
-        self.currentlocation = ["1/F"]
+        self.currentlocation = []
         print("loading word2vec")
         word2vecPath = "./nltk_data/models/GoogleNews-vectors-negative300/GoogleNews-vectors-negative300.bin"
         self.word2vec = gensim.models.KeyedVectors.load_word2vec_format(word2vecPath , binary=True)
@@ -198,6 +197,8 @@ class Chatbot():
                     return None
                 
     def renewlocation(self,locations):
+        self.currentlocation = locations
+        return None
 
     def askQuestion(self, question):
         """Ask a question to the chat bot
@@ -227,7 +228,7 @@ class Chatbot():
             locationTags= self.currentlocation
         else:
             locationTags = getLocation(question)
-            renewlocation(locations=locationTags)
+            self.renewlocation(locations=locationTags)
             
         print("category: ", maxCategory)
         print("tag: ", tagSimilarity)
