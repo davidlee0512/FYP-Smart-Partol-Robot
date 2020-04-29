@@ -62,7 +62,7 @@ CREATE TABLE `matching` (
 
 LOCK TABLES `matching` WRITE;
 /*!40000 ALTER TABLE `matching` DISABLE KEYS */;
-INSERT INTO `matching` VALUES (1,1),(2,1),(4,2),(3,6),(11,6),(1,8),(11,11),(3,12),(9,14),(10,15),(6,16),(6,17),(8,18),(5,20),(7,21),(7,22);
+INSERT INTO `matching` VALUES (1,1),(2,1),(4,2),(3,6),(11,6),(1,8),(11,11),(3,12),(9,14),(10,15),(6,16),(6,17),(8,18),(5,20),(7,21),(7,22),(1,23),(2,23),(3,23),(4,23),(5,23),(7,23),(8,23),(9,23),(10,23),(11,23),(6,24),(1,26),(3,26),(5,26),(6,26),(8,26),(9,26),(2,27),(4,27),(7,27),(10,27);
 /*!40000 ALTER TABLE `matching` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -87,7 +87,7 @@ CREATE TABLE `place` (
 
 LOCK TABLES `place` WRITE;
 /*!40000 ALTER TABLE `place` DISABLE KEYS */;
-INSERT INTO `place` VALUES (1,'McDonald\'s','shop 100, 1/F, area A, terminal 1'),(2,'KFC','shop 201, 2/F, area B, terminal 1'),(3,'Ajisen Ramen','shop 101, 1/F, area A, terminal 1'),(4,'Crystal Jade','shop 202, 2/F, area B, terminal 1'),(5,'Beauty&You','shop 120, 1/F, area D, terminal 1'),(6,'Burberry','shop 141, 1/F, area E, terminal 1'),(7,'Cartier','shop 220, 2/F, area C, terminal 1'),(8,'Chung Hwa Book Co.','shop 169, 1/F, area F, terminal 1'),(9,'toilet','t1, 1/F, area A, terminal 1'),(10,'prayer room','pr1, 2/F, area C, terminal 1'),(11,'Fresh Sushi','somewhere, terminal 1');
+INSERT INTO `place` VALUES (1,'McDonald\'s','shop 100, 1/F, area A, terminal 1'),(2,'KFC','shop 201, 2/F, area B, terminal 1'),(3,'Ajisen Ramen','shop 101, 1/F, area A, terminal 1'),(4,'Crystal Jade','shop 202, 2/F, area B, terminal 1'),(5,'Beauty&You','shop 120, 1/F, area D, terminal 1'),(6,'Burberry','shop 141, 1/F, area E, terminal 2'),(7,'Cartier','shop 220, 2/F, area C, terminal 1'),(8,'Chung Hwa Book Co.','shop 169, 1/F, area F, terminal 1'),(9,'toilet','t1, 1/F, area A, terminal 1'),(10,'prayer room','pr1, 2/F, area C, terminal 1'),(11,'Fresh Sushi','somewhere, terminal 1');
 /*!40000 ALTER TABLE `place` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -128,4 +128,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-04-24 22:42:23
+-- Dump completed on 2020-04-29 12:20:33
