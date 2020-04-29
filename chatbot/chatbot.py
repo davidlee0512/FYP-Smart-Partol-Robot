@@ -97,8 +97,11 @@ class KeyWordClassifer(Classifier):
                             allDeps(parse.nodes[j])
 
                 def getObj(_node):
+                    base = _node
                     try:
-                        base = parse.nodes[_node["deps"]["obj"][0]]
+                        while "obj" not in base["deps"].keys():
+                            base = parse.nodes[base["deps"]["xcomp"][0]]
+                        base = parse.nodes[base["deps"]["obj"][0]]
                     except:
                         base = None
                         
@@ -223,13 +226,17 @@ class Chatbot():
         questionLang = response.src
         question = response.text
 
+        print("questionLang: ", questionLang)
+        print("question: ", question)
+
         #get the probility of the question to each class
         similarities = [(classifier.similar(question), category) for category, classifier in self.classifiers.items()] 
         print(similarities)
 
         maxSimilarity, maxCategory = max(similarities)
-        if (maxSimilarity < 0.5):
-            return "I don't know your question, please ask again"
+        if (maxSimilarity < 0.4):
+            return "我不知道你的問題，請重新發問" if (questionLang == "zh-CN") else "I don't know your question, please ask again"
+
         #get the probility of each tag and get the location information in the question
         tagSimilarity = self.classifiers[maxCategory].getTagFromSentence(question)
         locationTags = getLocation(question)
@@ -254,9 +261,9 @@ class Chatbot():
      
         dbResult = self.fetchInfoFromDB(category=maxCategory, locations=locationTags, tags=tags)
 
-        #TODO add output for chinese input
+        output = ""
         if (questionLang == "zh-CN"):
-            output = "搜尋結果:\n"
+            output += "搜尋結果:\n"
             output += "搜尋項目: " + maxCategory + "\n"
 
             if tags:
@@ -270,20 +277,20 @@ class Chatbot():
             else:
                 output += "找不到相關項目"
                 return output
-
-        output = "Here is the result:\n"
-        output += "Category: " + maxCategory + "\n"
-
-        if tags:
-            output += "Tags: " + str(tags) + "\n"
-
-        if locationTags:
-            output += "Location: " + str(locationTags) + "\n"
-
-        if dbResult:
-            output += str(dbResult) 
         else:
-            output += "Cannot find any result these requirement"
+            output = "Here is the result:\n"
+            output += "Category: " + maxCategory + "\n"
+
+            if tags:
+                output += "Tags: " + str(tags) + "\n"
+
+            if locationTags:
+                output += "Location: " + str(locationTags) + "\n"
+
+            if dbResult:
+                output += str(dbResult) 
+            else:
+                output += "Cannot find any result these requirement"
         
 
         return output
