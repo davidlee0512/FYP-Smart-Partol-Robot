@@ -171,9 +171,32 @@ class Chatbot():
     def fetchInfoFromDB(self, category="", locations=[], tags=[]):
         if self.db and category:
             with self.db.cursor() as cursor:
-                tags = [tag for tag, isNeg in tags]
+                posTags = [tag for tag, isNeg in tags if not isNeg]
+                negTags = [tag for tag, isNeg in tags if isNeg]
 
-                if tags:
+                if posTags and negTags:
+                    print(0)
+                    sql = """
+                        SELECT place.id, place.name, place.location 
+                        FROM place, category, matching, tag 
+                        WHERE category.name = '{0}' AND {1} tag.name IN {2} AND tag.name NOT IN {4} AND place.id = matching.pid AND tag.id = matching.tid AND category.id = tag.cid 
+                        GROUP BY place.id 
+                        HAVING COUNT(DISTINCT tag.name) = {3}
+                        ORDER BY RAND()
+                        LIMIT 1;
+                        """.format(category, "".join(["place.location LIKE '%" + location + "%' AND" for location in locations]), "('"+ "', '".join(posTags) +"')", len(posTags),"('"+ "', '".join(negTags) +"')")
+                elif negTags:
+                    print(1)
+                    sql = """
+                        SELECT place.id, place.name, place.location 
+                        FROM place, category, matching, tag 
+                        WHERE category.name = '{0}' AND {1}tag.name NOT IN {2} AND place.id = matching.pid AND tag.id = matching.tid AND category.id = tag.cid 
+                        GROUP BY place.id
+                        ORDER BY RAND()
+                        LIMIT 1;
+                        """.format(category, "".join(["place.location LIKE '%" + location + "%' AND " for location in locations]), "('"+ "', '".join(negTags) +"')")
+                elif posTags:
+                    print(2)
                     sql = """
                         SELECT place.id, place.name, place.location 
                         FROM place, category, matching, tag 
@@ -182,8 +205,9 @@ class Chatbot():
                         HAVING COUNT(DISTINCT tag.name) = {3}
                         ORDER BY RAND()
                         LIMIT 1;
-                        """.format(category, "".join(["place.location LIKE '%" + location + "%' AND " for location in locations]), "('"+ "', '".join(tags) +"')", len(tags))
+                        """.format(category, "".join(["place.location LIKE '%" + location + "%' AND " for location in locations]), "('"+ "', '".join(posTags) +"')", len(posTags))
                 else:
+                    print(3)
                     sql = """
                         SELECT place.id, place.name, place.location 
                         FROM place, category, matching, tag 
