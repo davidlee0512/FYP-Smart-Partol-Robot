@@ -151,6 +151,7 @@ class Chatbot():
         self.categorys = categorys
         self.db = MySQLdb.connect(*dbargs) or None
         self.currentlocation = []
+        self.currentTerminal = None
         print("loading word2vec")
         word2vecPath = "./nltk_data/models/GoogleNews-vectors-negative300/GoogleNews-vectors-negative300.bin"
         self.word2vec = gensim.models.KeyedVectors.load_word2vec_format(word2vecPath , binary=True)
@@ -197,8 +198,16 @@ class Chatbot():
                     return None
                 
     def renewlocation(self,locations):
-        self.currentlocation = locations
+        self.currentlocation = locations.copy()
         return None
+    def checktermianl(self,locations):
+        locationlist = locations.copy()
+        for x in locationlist:
+            if x == "terminal 1" or x =="terminal 2":
+                self.currentTerminal=x
+                locations.remove(x)
+        return locations
+        
 
     def askQuestion(self, question):
         """Ask a question to the chat bot
@@ -221,14 +230,20 @@ class Chatbot():
         maxSimilarity, maxCategory = max(similarities)
         if (maxSimilarity < 0.5):
             return "I don't know your question, please ask again"
-
         #get the probility of each tag and get the location information in the question
         tagSimilarity = self.classifiers[maxCategory].getTagFromSentence(question)
-        if not getLocation(question):
-            locationTags= self.currentlocation
+        locationTags = getLocation(question)
+        if not locationTags:
+            temp = self.currentlocation.copy()
+            if self.currentTerminal != None:
+                temp.append(self.currentTerminal)
+            locationTags= temp
         else:
-            locationTags = getLocation(question)
-            self.renewlocation(locations=locationTags)
+            locationTags=self.checktermianl(locationTags)
+            #print("terminal: ", self.currentTerminal)
+           # print("remove location : ", locationTags)
+            self.renewlocation(locationTags)
+            locationTags.append(self.currentTerminal)
             
         print("category: ", maxCategory)
         print("tag: ", tagSimilarity)
@@ -236,12 +251,7 @@ class Chatbot():
 
         #filter the tag with high similarity and use it to search the database
         tags = [(tag,isNeg) for (sim, isNeg), tag in tagSimilarity if sim > 0.7]
-        #userpreference.extend(tags)
-        #s = []
-        #for i in userpreference:
-        #    if i not in s:
-        #     s.append(i)
-        #userpreference=s
+     
         dbResult = self.fetchInfoFromDB(category=maxCategory, locations=locationTags, tags=tags)
 
         #TODO add output for chinese input
