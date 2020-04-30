@@ -75,78 +75,92 @@ class KeyWordClassifer(Classifier):
         return max(approximates + exacts)
 
     def getTagFromSentence(self, sentence):
-        words = nltk.word_tokenize(sentence.lower())
-        notWords = ["not", "n't", "hate", "except", "without", "no"]
-
-        #required the parser server to be open
-        dep_parser = CoreNLPDependencyParser(url='http://localhost:9000')
-        #parse is a DependencyGraph object(nltk.parse.DependencyGraph)
-        parse, = dep_parser.raw_parse(sentence)
-
-        #words is a list of (word, positive search or negative search)
-        words = [(node["word"], False) for node in parse.nodes.values()]
-
-        #switching some part of the word into negative search if it is in notWords
-        for node in parse.nodes.values():
-            if node["word"] in notWords:
-                def allDeps(_node):
-                    i = _node["address"]
-                    words[i] = (words[i][0], True)
-                    for rel in _node["deps"]:
-                        for j in _node["deps"][rel]:
-                            allDeps(parse.nodes[j])
-
-                def getObj(_node):
-                    base = _node
-                    try:
-                        while "obj" not in base["deps"].keys():
-                            base = parse.nodes[base["deps"]["xcomp"][0]]
-                        base = parse.nodes[base["deps"]["obj"][0]]
-                    except:
-                        base = None
-                        
-                    return base
-                
-                #case a proposition
-                if node["word"] in ["no", "without", "except"]:
-                    base = parse.nodes[node["head"]]
-                    allDeps(base)
-
-                #case of not
-                elif node["word"] in ["not", "n't"]:
-                    head = parse.nodes[node["head"]]
-                    if re.search(r"VB[a-zA-Z]*", head["tag"]):
-                        base = getObj(head)
-                    else:
-                        base = head
-
-                    if base:
-                        allDeps(base)
-
-                #case of verb
-                elif node["word"] in ["hate"]:
-                    base = getObj(node)
-
-                    if base:
-                        allDeps(base)
+        words = getWordList(sentence)
 
         return [(max([(self.model.similarity(word, tag), negSearch) for word, negSearch in words if word in self.model]), tag)for tag in self.tags]
 
+def getLocation(sentence): 
+    words = getWordList(sentence)
 
-def getLocation(sentence):
     #pattens for getting location
-    locationPatterns = [(r'([a-z]+) floor', "{}/F"), (r'terminal ([a-z]+)', "terminal {0}")]
+    locationPatterns = {'floor': "{0}/F", 'terminal': "terminal {0}"}
     numberMaping = {"zero":0, "one":1, "two":2, "three":3, "four":4, "five":5, "six":6, "seven":7, "eight":8, "nine":9, 
         "first":1, "second":2, "third":3, "fourth":4, "fifth":5, "sixth":6, "seventh":7, "eighth":8, "ninth":9}
-    
+
     results = []
-    for locationPattern, locationFormat in locationPatterns:
-        result = re.search(locationPattern, sentence, re.IGNORECASE)
-        if result and result.group(1) in numberMaping:
-            results.append(locationFormat.format(numberMaping[result.group(1)]))
+    for i, (word, isNeg) in enumerate(words):
+        if word in locationPatterns:
+            gotNum = False
+            try:
+                if words[i-1] in numberMaping:
+                    number = numberMaping[words[i-1]]
+                    gotNum = True
+            try:
+                if words[i+1] in numberMaping:
+                    number = numberMaping[words[i+1]]
+                    gotNum = True
+            
+            if gotNum:
+                results.append((locationPatterns[word].format(number), isNeg))
 
     return results
 
+def getWordList(sentence):
+    notWords = ["not", "n't", "hate", "except", "without", "no"]
+
+    #required the parser server to be open
+    dep_parser = CoreNLPDependencyParser(url='http://localhost:9000')
+    #parse is a DependencyGraph object(nltk.parse.DependencyGraph)
+    parse, = dep_parser.raw_parse(sentence.lower())
+
+    #words is a list of (word, positive search or negative search)
+    words = [(node["word"], False) for node in parse.nodes.values()]
+
+    #switching some part of the word into negative search if it is in notWords
+    for node in parse.nodes.values():
+        if node["word"] in notWords:
+            def allDeps(_node):
+                i = _node["address"]
+                words[i] = (words[i][0], True)
+                for rel in _node["deps"]:
+                    for j in _node["deps"][rel]:
+                        allDeps(parse.nodes[j])
+
+            def getObj(_node):
+                base = _node
+                try:
+                    while "obj" not in base["deps"].keys():
+                        base = parse.nodes[base["deps"]["xcomp"][0]]
+                    base = parse.nodes[base["deps"]["obj"][0]]
+                except:
+                    base = None
+                    
+                return base
+            
+            #case a proposition
+            if node["word"] in ["no", "without", "except"]:
+                base = parse.nodes[node["head"]]
+                allDeps(base)
+
+            #case of not
+            elif node["word"] in ["not", "n't"]:
+                head = parse.nodes[node["head"]]
+                if re.search(r"VB[a-zA-Z]*", head["tag"]):
+                    base = getObj(head)
+                else:
+                    base = head
+
+                if base:
+                    allDeps(base)
+
+            #case of verb
+            elif node["word"] in ["hate"]:
+                base = getObj(node)
+
+                if base:
+                    allDeps(base)
+
+    return words
 
 class Chatbot():
 
@@ -263,7 +277,15 @@ class Chatbot():
 
         #get the probility of each tag and get the location information in the question
         tagSimilarity = self.classifiers[maxCategory].getTagFromSentence(question)
+
+        #try to get location tag in the question
         locationTags = getLocation(question)
+
+        #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        #need to remove this line in later(in order to use the isNeg in location tag)
+        locationTags = [locationtag for locationtag, isNeg in locationTags]
+
+        #use location in previous question as the lcoation on this
         if not locationTags:
             temp = self.currentlocation.copy()
             if self.currentTerminal != None:
