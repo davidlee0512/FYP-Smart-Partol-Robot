@@ -77,7 +77,7 @@ class KeyWordClassifer(Classifier):
     def getTagFromSentence(self, sentence):
         words = getWordList(sentence)
 
-        return [(max([(self.model.similarity(word, tag), negSearch) for word, negSearch in words if word in self.model]), tag)for tag in self.tags]
+        return [(max([(self.model.similarity(word, tag), negSearch) for word, negSearch in words.values() if word in self.model]), tag)for tag in self.tags]
 
 def getLocation(sentence): 
     words = getWordList(sentence)
@@ -88,18 +88,19 @@ def getLocation(sentence):
         "first":1, "second":2, "third":3, "fourth":4, "fifth":5, "sixth":6, "seventh":7, "eighth":8, "ninth":9}
 
     results = []
-    for i, (word, isNeg) in enumerate(words):
+    for i, (word, isNeg) in words.items():
         if word in locationPatterns:
             gotNum = False
+            number = None
             try:
-                if words[i-1] in numberMaping:
-                    number = numberMaping[words[i-1]]
+                if words[i-1][0] in numberMaping:
+                    number = numberMaping[words[i-1][0]]
                     gotNum = True
             except:
                 pass
             try:
-                if words[i+1] in numberMaping:
-                    number = numberMaping[words[i+1]]
+                if words[i+1][0] in numberMaping:
+                    number = numberMaping[words[i+1][0]]
                     gotNum = True
             except:
                 pass
@@ -117,8 +118,11 @@ def getWordList(sentence):
     #parse is a DependencyGraph object(nltk.parse.DependencyGraph)
     parse, = dep_parser.raw_parse(sentence.lower())
 
+    words = {}
+
     #words is a list of (word, positive search or negative search)
-    words = [(node["word"], False) for node in parse.nodes.values()]
+    for node in parse.nodes.values():
+        words[node["address"]] = (node["word"], False)
 
     #switching some part of the word into negative search if it is in notWords
     for node in parse.nodes.values():
@@ -289,7 +293,6 @@ class Chatbot():
 
         #try to get location tag in the question
         locationTags = getLocation(question)
-
         #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         #need to remove this line in later(in order to use the isNeg in location tag)
         locationTags = [locationtag for locationtag, isNeg in locationTags]
