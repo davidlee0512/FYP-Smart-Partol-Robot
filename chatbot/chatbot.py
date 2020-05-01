@@ -257,11 +257,13 @@ class Chatbot():
     def checktermianl(self,locations):
         locationlist = locations.copy()
         for x in locationlist:
-            if x == "terminal 1" or x =="terminal 2":
+            if x == ("terminal 1",True) or x ==("terminal 2",True) or x == ("terminal 1",False) or x ==("terminal 2",False) :
                 self.currentTerminal=x
                 locations.remove(x)
         return locations
-        
+    def resetall(self):
+        self.currentlocation = []
+        self.currentTerminal = None    
 
     def askQuestion(self, question):
         """Ask a question to the chat bot
@@ -295,7 +297,7 @@ class Chatbot():
         locationTags = getLocation(question)
         #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         #need to remove this line in later(in order to use the isNeg in location tag)
-        locationTags = [locationtag for locationtag, isNeg in locationTags]
+        #locationTags = [locationtag for locationtag, isNeg in locationTags]
 
         #use location in previous question as the lcoation on this
         if not locationTags:
@@ -305,10 +307,12 @@ class Chatbot():
             locationTags= temp
         else:
             locationTags=self.checktermianl(locationTags)
+            print("current terminal:" , self.currentTerminal)
             #print("terminal: ", self.currentTerminal)
            # print("remove location : ", locationTags)
             self.renewlocation(locationTags)
-            locationTags.append(self.currentTerminal)
+            if self.currentTerminal != None:
+                locationTags.append(self.currentTerminal)
             
         print("category: ", maxCategory)
         print("tag: ", tagSimilarity)

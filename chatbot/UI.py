@@ -61,7 +61,7 @@ def ask(event=None):
 def toend():
     canvas.yview_moveto(1)
 def reset():
-    None
+    chatbot.resetall()
 
 
 
