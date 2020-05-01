@@ -128,11 +128,13 @@ def getWordList(sentence):
     for node in parse.nodes.values():
         if node["word"] in notWords:
             def allDeps(_node):
-                i = _node["address"]
-                words[i] = (words[i][0], True)
-                for rel in _node["deps"]:
-                    for j in _node["deps"][rel]:
-                        allDeps(parse.nodes[j])
+                if _node:
+                    i = _node["address"]
+                    words[i] = (words[i][0], True)
+                    for rel in _node["deps"]:
+                        for j in _node["deps"][rel]:
+                            allDeps(parse.nodes[j])
+
 
             def getObj(_node):
                 base = _node
@@ -140,6 +142,17 @@ def getWordList(sentence):
                     while "obj" not in base["deps"].keys():
                         base = parse.nodes[base["deps"]["xcomp"][0]]
                     base = parse.nodes[base["deps"]["obj"][0]]
+                except:
+                    base = None
+                    
+                return base
+
+            def getObl(_node):
+                base = _node
+                try:
+                    while "obl" not in base["deps"].keys():
+                        base = parse.nodes[base["deps"]["xcomp"][0]]
+                    base = parse.nodes[base["deps"]["obl"][0]]
                 except:
                     base = None
                     
@@ -152,21 +165,19 @@ def getWordList(sentence):
 
             #case of not
             elif node["word"] in ["not", "n't"]:
-                head = parse.nodes[node["head"]]
-                if re.search(r"VB[a-zA-Z]*", head["tag"]):
-                    base = getObj(head)
+                target = parse.nodes[node["head"]] if node["rel"] != "conj" else node
+                if re.search(r"VB[a-zA-Z]*", target["tag"]):
+                    allDeps(getObj(target))
                 else:
-                    base = head
+                    allDeps(target)
 
-                if base:
-                    allDeps(base)
+                allDeps(getObl(target))
 
             #case of verb
             elif node["word"] in ["hate"]:
-                base = getObj(node)
+                allDeps(getObj(node))
+                allDeps(getObl(node))
 
-                if base:
-                    allDeps(base)
 
     return words
 
@@ -196,7 +207,11 @@ class Chatbot():
                 posTags = [tag for tag, isNeg in tags if not isNeg]
                 negTags = [tag for tag, isNeg in tags if isNeg]
 
-                locationQuery = "".join(["place.location LIKE '%" + location + "%' AND " for location in locations])
+                posLocations = [location for location, isNeg in locations if not isNeg]
+                negLocations = [location for location, isNeg in locations if not isNeg]
+
+                posLocationQuery = "".join(["place.location LIKE '%" + posLocation + "%' AND " for posLocation in posLocations])
+                negLocationQuery = "".join(["place.location NOT LIKE '%" + negLocation + "%' AND " for negLocation in negLocations])
 
                 if posTags and negTags:
                     print(0)
@@ -204,7 +219,7 @@ class Chatbot():
                     SELECT * FROM place WHERE place.id IN (
                         SELECT place.id
                         FROM place, category, matching, tag 
-                        WHERE category.name = '{category}' AND {locationQuery} tag.name IN ('{"', '".join(posTags)}') AND place.id = matching.pid AND tag.id = matching.tid AND category.id = tag.cid 
+                        WHERE category.name = '{category}' AND {posLocationQuery} {negLocationQuery} tag.name IN ('{"', '".join(posTags)}') AND place.id = matching.pid AND tag.id = matching.tid AND category.id = tag.cid 
                         GROUP BY place.id 
                         HAVING COUNT(DISTINCT tag.name) = {len(posTags)}
                     ) AND place.id NOT IN (
@@ -220,7 +235,7 @@ class Chatbot():
                         SELECT * FROM place WHERE place.id IN (
                             SELECT place.id
                             FROM place, category, matching, tag 
-                            WHERE category.name = '{category}' AND {locationQuery} place.id = matching.pid AND tag.id = matching.tid AND category.id = tag.cid 
+                            WHERE category.name = '{category}' AND {posLocationQuery} {negLocationQuery} place.id = matching.pid AND tag.id = matching.tid AND category.id = tag.cid 
                             GROUP BY place.id 
                         ) AND place.id NOT IN (
                             SELECT place.id
@@ -234,7 +249,7 @@ class Chatbot():
                     sql = f"""
                         SELECT place.id, place.name, place.location 
                         FROM place, category, matching, tag 
-                        WHERE category.name = '{category}' AND {locationQuery}tag.name IN ('{"', '".join(posTags)}') AND place.id = matching.pid AND tag.id = matching.tid AND category.id = tag.cid 
+                        WHERE category.name = '{category}' AND {posLocationQuery} {negLocationQuery} tag.name IN ('{"', '".join(posTags)}') AND place.id = matching.pid AND tag.id = matching.tid AND category.id = tag.cid 
                         GROUP BY place.id 
                         HAVING COUNT(DISTINCT tag.name) = {len(posTags)}
                         """
@@ -243,9 +258,11 @@ class Chatbot():
                     sql = f"""
                         SELECT place.id, place.name, place.location 
                         FROM place, category, matching, tag 
-                        WHERE category.name = '{category}' AND {locationQuery}place.id = matching.pid AND tag.id = matching.tid AND category.id = tag.cid 
+                        WHERE category.name = '{category}' AND {posLocationQuery} {negLocationQuery} place.id = matching.pid AND tag.id = matching.tid AND category.id = tag.cid 
                         GROUP BY place.id
                         """
+
+                print("sql: ", sql)
 
                 cursor.execute(sql)
                 result = cursor.fetchall()
@@ -257,7 +274,7 @@ class Chatbot():
     def checktermianl(self,locations):
         locationlist = locations.copy()
         for x in locationlist:
-            if x == ("terminal 1",True) or x ==("terminal 2",True) or x == ("terminal 1",False) or x ==("terminal 2",False) :
+            if x[0] == "terminal 1" or x[0] =="terminal 2":
                 self.currentTerminal=x
                 locations.remove(x)
         return locations
@@ -273,6 +290,8 @@ class Chatbot():
 
         return the answer
         """
+
+        question = question.replace('\n', '')
 
         translator = Translator()
         response =  translator.translate(question)
