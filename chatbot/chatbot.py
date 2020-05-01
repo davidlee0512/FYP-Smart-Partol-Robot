@@ -95,10 +95,14 @@ def getLocation(sentence):
                 if words[i-1] in numberMaping:
                     number = numberMaping[words[i-1]]
                     gotNum = True
+            except:
+                pass
             try:
                 if words[i+1] in numberMaping:
                     number = numberMaping[words[i+1]]
                     gotNum = True
+            except:
+                pass
             
             if gotNum:
                 results.append((locationPatterns[word].format(number), isNeg))
@@ -188,55 +192,60 @@ class Chatbot():
                 posTags = [tag for tag, isNeg in tags if not isNeg]
                 negTags = [tag for tag, isNeg in tags if isNeg]
 
+                locationQuery = "".join(["place.location LIKE '%" + location + "%' AND " for location in locations])
+
                 if posTags and negTags:
                     print(0)
-                    sql = """
-                        SELECT place.id, place.name, place.location 
+                    sql = f"""
+                    SELECT * FROM place WHERE place.id IN (
+                        SELECT place.id
                         FROM place, category, matching, tag 
-                        WHERE category.name = '{0}' AND {1} tag.name IN {2} AND tag.name NOT IN {4} AND place.id = matching.pid AND tag.id = matching.tid AND category.id = tag.cid 
+                        WHERE category.name = '{category}' AND {locationQuery} tag.name IN ('{"', '".join(posTags)}') AND place.id = matching.pid AND tag.id = matching.tid AND category.id = tag.cid 
                         GROUP BY place.id 
-                        HAVING COUNT(DISTINCT tag.name) = {3}
-                        ORDER BY RAND()
-                        LIMIT 1;
-                        """.format(category, "".join(["place.location LIKE '%" + location + "%' AND" for location in locations]), "('"+ "', '".join(posTags) +"')", len(posTags),"('"+ "', '".join(negTags) +"')")
+                        HAVING COUNT(DISTINCT tag.name) = {len(posTags)}
+                    ) AND place.id NOT IN (
+                        SELECT place.id
+                        FROM place, category, matching, tag 
+                        WHERE category.name = '{category}' AND tag.name IN ('{"', '".join(negTags)}') AND place.id = matching.pid AND tag.id = matching.tid AND category.id = tag.cid 
+                        GROUP BY place.id
+                    )
+                    """
                 elif negTags:
                     print(1)
-                    sql = """
-                        SELECT place.id, place.name, place.location 
-                        FROM place, category, matching, tag 
-                        WHERE category.name = '{0}' AND {1}tag.name NOT IN {2} AND place.id = matching.pid AND tag.id = matching.tid AND category.id = tag.cid 
-                        GROUP BY place.id
-                        ORDER BY RAND()
-                        LIMIT 1;
-                        """.format(category, "".join(["place.location LIKE '%" + location + "%' AND " for location in locations]), "('"+ "', '".join(negTags) +"')")
+                    sql = f"""
+                        SELECT * FROM place WHERE place.id IN (
+                            SELECT place.id
+                            FROM place, category, matching, tag 
+                            WHERE category.name = '{category}' AND {locationQuery} place.id = matching.pid AND tag.id = matching.tid AND category.id = tag.cid 
+                            GROUP BY place.id 
+                        ) AND place.id NOT IN (
+                            SELECT place.id
+                            FROM place, category, matching, tag 
+                            WHERE category.name = '{category}' AND tag.name IN ('{"', '".join(negTags)}') AND place.id = matching.pid AND tag.id = matching.tid AND category.id = tag.cid 
+                            GROUP BY place.id
+                        )
+                        """
                 elif posTags:
                     print(2)
-                    sql = """
+                    sql = f"""
                         SELECT place.id, place.name, place.location 
                         FROM place, category, matching, tag 
-                        WHERE category.name = '{0}' AND {1}tag.name IN {2} AND place.id = matching.pid AND tag.id = matching.tid AND category.id = tag.cid 
+                        WHERE category.name = '{category}' AND {locationQuery}tag.name IN ('{"', '".join(posTags)}') AND place.id = matching.pid AND tag.id = matching.tid AND category.id = tag.cid 
                         GROUP BY place.id 
-                        HAVING COUNT(DISTINCT tag.name) = {3}
-                        ORDER BY RAND()
-                        LIMIT 1;
-                        """.format(category, "".join(["place.location LIKE '%" + location + "%' AND " for location in locations]), "('"+ "', '".join(posTags) +"')", len(posTags))
+                        HAVING COUNT(DISTINCT tag.name) = {len(posTags)}
+                        """
                 else:
                     print(3)
-                    sql = """
+                    sql = f"""
                         SELECT place.id, place.name, place.location 
                         FROM place, category, matching, tag 
-                        WHERE category.name = '{0}' AND {1}place.id = matching.pid AND tag.id = matching.tid AND category.id = tag.cid 
-                        GROUP BY place.id 
-                        ORDER BY RAND()
-                        LIMIT 1;
-                        """.format(category, "".join(["place.location LIKE '%" + location + "%' AND " for location in locations]))
+                        WHERE category.name = '{category}' AND {locationQuery}place.id = matching.pid AND tag.id = matching.tid AND category.id = tag.cid 
+                        GROUP BY place.id
+                        """
 
                 cursor.execute(sql)
                 result = cursor.fetchall()
-                if result:
-                    return random.choice(result)
-                else:
-                    return None
+                return result
                 
     def renewlocation(self,locations):
         self.currentlocation = locations.copy()
@@ -334,7 +343,7 @@ class Chatbot():
                 output += "Location: " + str(locationTags) + "\n"
 
             if dbResult:
-                output += str(dbResult) 
+                output += "\n".join((str(result) for result in dbResult))
             else:
                 output += "Cannot find any result these requirement"
         
