@@ -208,7 +208,7 @@ class Chatbot():
                 negTags = [tag for tag, isNeg in tags if isNeg]
 
                 posLocations = [location for location, isNeg in locations if not isNeg]
-                negLocations = [location for location, isNeg in locations if not isNeg]
+                negLocations = [location for location, isNeg in locations if isNeg]
 
                 posLocationQuery = "".join(["place.location LIKE '%" + posLocation + "%' AND " for posLocation in posLocations])
                 negLocationQuery = "".join(["place.location NOT LIKE '%" + negLocation + "%' AND " for negLocation in negLocations])
@@ -354,7 +354,7 @@ class Chatbot():
                 output += "地點: " + str(locationTags) + "\n"
 
             if dbResult:
-                output += str(dbResult) 
+                output += "\n".join((str(result) for result in dbResult))
             else:
                 output += "找不到相關項目"
                 return output
