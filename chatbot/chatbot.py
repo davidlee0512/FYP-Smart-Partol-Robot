@@ -11,7 +11,7 @@ from googletrans import Translator
 from nltk.parse.corenlp import CoreNLPDependencyParser
 import os.path
 
-nltk.data.path += ["./nltk_data"]
+nltk.data.path += [os.path.join(os.path.dirname(__file__),"./nltk_data")]
 
 class Classifier:
     
