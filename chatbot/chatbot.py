@@ -9,6 +9,7 @@ import MySQLdb
 import random
 from googletrans import Translator
 from nltk.parse.corenlp import CoreNLPDependencyParser
+import os.path
 
 nltk.data.path += ["./nltk_data"]
 
@@ -45,7 +46,7 @@ class KeyWordClassifer(Classifier):
         self.tags = [tag for tag in tags if tag in self.model]
         print("loaded tag: ", self.tags)
         print("loading ", category)
-        path = "./keyword/" + category + ".txt"
+        path = os.path.join(os.path.dirname(__file__), "./keyword/" + category + ".txt")
         try:
             with open(path, "r") as f:
                 keywords = f.read().split('\n')
@@ -195,7 +196,7 @@ class Chatbot():
         self.currentlocation = []
         self.currentTerminal = None
         print("loading word2vec")
-        word2vecPath = "./nltk_data/models/GoogleNews-vectors-negative300/GoogleNews-vectors-negative300.bin"
+        word2vecPath = os.path.join(os.path.dirname(__file__), "./nltk_data/models/GoogleNews-vectors-negative300/GoogleNews-vectors-negative300.bin")
         self.word2vec = gensim.models.KeyedVectors.load_word2vec_format(word2vecPath , binary=True)
 
         with self.db.cursor() as cursor:
