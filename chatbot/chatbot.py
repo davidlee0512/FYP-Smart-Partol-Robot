@@ -147,7 +147,10 @@ def getWordList(sentence):
                 base = _node
                 try:
                     while "obj" not in base["deps"].keys():
-                        base = parse.nodes[base["deps"]["xcomp"][0]]
+                        if "xcomp" in base["deps"].keys():
+                            base = parse.nodes[base["deps"]["xcomp"][0]]
+                        else:
+                            base = parse.nodes[base["deps"]["ccomp"][0]]
                     base = parse.nodes[base["deps"]["obj"][0]]
                 except:
                     base = None
@@ -158,7 +161,10 @@ def getWordList(sentence):
                 base = _node
                 try:
                     while "obl" not in base["deps"].keys():
-                        base = parse.nodes[base["deps"]["xcomp"][0]]
+                        if "xcomp" in base["deps"].keys():
+                            base = parse.nodes[base["deps"]["xcomp"][0]]
+                        else:
+                            base = parse.nodes[base["deps"]["ccomp"][0]]
                     base = parse.nodes[base["deps"]["obl"][0]]
                 except:
                     base = None
