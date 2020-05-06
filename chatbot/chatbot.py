@@ -96,11 +96,17 @@ def getLocation(sentence):
                 if words[i-1][0] in numberMaping:
                     number = numberMaping[words[i-1][0]]
                     gotNum = True
+                elif words[i-1][0] in ["0","1","2","3","4","5","6","7","8","9"]:
+                    number = int(words[i-1][0])
+                    gotNum = True
             except:
                 pass
             try:
                 if words[i+1][0] in numberMaping:
                     number = numberMaping[words[i+1][0]]
+                    gotNum = True
+                elif words[i+1][0] in ["0","1","2","3","4","5","6","7","8","9"]:
+                    number = int(words[i+1][0])
                     gotNum = True
             except:
                 pass
@@ -294,10 +300,8 @@ class Chatbot():
         question = question.replace('\n', '')
 
         translator = Translator()
-        response =  translator.translate(question)
-        questionLang = response.src
-        question = response.text
-
+        questionLang = translator.detect(question).lang
+        question = translator.translate(question, src="zh-CN").text
         print("questionLang: ", questionLang)
         print("question: ", question)
 
